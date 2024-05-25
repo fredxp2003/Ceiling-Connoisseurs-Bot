@@ -13,8 +13,8 @@ class General(commands.Cog):
     @discord.slash_command(name = "version", description = "Returns the bot's version and change log.")
     async def version(self, ctx):
         embed = discord.Embed(
-            title="Version 1.1.1",
-            description="Changes in this version:\n- Increased the number of 🔥 reactions needed to get a premium ceiling from 10 -> 12.\n- Created a new way to get info about premium ceilings from users.\n- Added new premium ceiling phrases.\n- Fixed a bug where the bot would post the same ceiling multiple times.\nNew in 1.1.1:\n- Removed ping in premium-ceiling announcement.",
+            title="Version 1.2",
+            description="Changes in this version:\n- Leaderboards are here!  Stay tuned for more information about them!\n- Minor bug fixes.",
             color=discord.Colour.dark_purple()
         )
 

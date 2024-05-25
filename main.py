@@ -11,11 +11,15 @@ intents = discord.Intents.default()
 intents.members = True
 bot = discord.Bot(intents=intents)
 
-DB_NAME = 'premium_ceiling.db'
-PREMIUM_CEILING_CHANNEL_ID = 1150273041406890065
-BAD_CEILING_CHANNEL_ID = 1149113000465285231
+PREMIUM_CEILING_DB = 'premium_ceiling.db'
+LEADERBOARD_DB = 'leaderboard.db'
+
+PREMIUM_CEILING_CHANNEL_ID = 1243981538845134859    #1150273041406890065 <- Live Server
+BAD_CEILING_CHANNEL_ID  = 1243981590053392445        #1149113000465285231 <- Live Server
 ROLE_MESSAGE_ID = 1165779240659198072
 DEBATES_ROLE_NAME = "Debates"
+
+REACTION_NUMBER = 1
 
 
 good_ceiling_phrases = [
@@ -27,7 +31,8 @@ good_ceiling_phrases = [
     "If I had a dollar for every time a ceiling made me think of the beauty of life, I would have lots of dollars.  But I would have one more right now!"
 ]
 
-setup_database(DB_NAME)
+setup_message_database(PREMIUM_CEILING_DB)
+setup_leaderboard_database(LEADERBOARD_DB)
 
 # Load all the cogs
 for filename in os.listdir('./cogs'):
@@ -44,8 +49,10 @@ async def on_ready():
 @bot.event
 async def on_raw_reaction_add(payload):
     if payload.emoji.name == "🔥" or payload.emoji.name == "😔":
+        print("Reaction added event triggered.")
         channel = bot.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
+        author_id = message.author.id
         pictures = []
         guild_id = message.guild.id
         channel_id = message.channel.id
@@ -56,31 +63,32 @@ async def on_raw_reaction_add(payload):
         for attachment in message.attachments:
             pictures.append(await attachment.to_file())
         
-        if message.attachments and not is_posted(message_id):
+        if message.attachments and not is_posted(PREMIUM_CEILING_DB, message_id):
             for reaction in message.reactions:
                 
                 # Premium Ceiling Gang
-                if reaction.emoji == "🔥" and reaction.count == 12:
+                if reaction.emoji == "🔥" and reaction.count == REACTION_NUMBER:
                     premium_channel = bot.get_channel(PREMIUM_CEILING_CHANNEL_ID)
                     
-                    await premium_channel.send(f"{random.choice(good_ceiling_phrases)}\n\n{link}\n\nTake a look at this fine ceiling provided by {message.author}:", files=pictures)
-                    insert_message_id(message_id) # add the message id to the database so we don't post it again
+                    await premium_channel.send(f"{random.choice(good_ceiling_phrases)}\n\n{link}\n\nTake a look at this fine ceiling provided by {message.author.display_name}:", files=pictures)
+                    insert_message_id(PREMIUM_CEILING_DB, message_id) # add the message id to the database so we don't post it again
+                    increase_premium_ceiling_count(LEADERBOARD_DB, author_id)
                     
                     # Send a dm to the user who posted the ceiling
                     await message.author.send(f"Congratulations, your ceiling made premium status! If you would like us to share a short ~30 second story about this ceiling at the next meeting, please share the story! You will also have the opportunity to share it yourself if you come to the next meeting :-)\n\nJust fill out the [Google Form](https://forms.gle/hv5CD9bWpYq71EDB7)!  [Ceiling we are talking about]({link})]")
                 
                 # Bad Ceilings
-                if reaction.emoji == "😔" and reaction.count == 12:
+                if reaction.emoji == "😔" and reaction.count == REACTION_NUMBER:
                     bad_channel = bot.get_channel(BAD_CEILING_CHANNEL_ID)
                     await bad_channel.send(f"TRIGGER WARNING: BAD CEILING ALERT\n\n{link}\n\nHelp shame this bad ceiling provided by {message.author}:", files=pictures)
                     insert_message_id(message_id) # add the message id to the database so we don't post it again
      
     #Debates Role
-    role_message = await bot.get_channel(payload.channel_id).fetch_message(ROLE_MESSAGE_ID)
-    reaction = discord.utils.get(role_message.reactions, emoji="📣")
-    user = payload.member
-    if reaction and user != bot.user:
-        await user.add_roles(discord.utils.get(user.guild.roles, name="Debates"))
+    # role_message = await bot.get_channel(payload.channel_id).fetch_message(ROLE_MESSAGE_ID)
+    # reaction = discord.utils.get(role_message.reactions, emoji="📣")
+    # user = payload.member
+    # if reaction and user != bot.user:
+    #     await user.add_roles(discord.utils.get(user.guild.roles, name="Debates"))
 
 @bot.event
 async def on_raw_reaction_remove(payload):
@@ -116,5 +124,7 @@ async def on_raw_reaction_remove(payload):
 
     await member.remove_roles(role)
 
+
+
 # Run the bot B)
-bot.run(os.getenv('TOKEN'))
+bot.run(os.getenv('TEST_TOKEN'))

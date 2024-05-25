@@ -35,3 +35,6 @@ class Debate(commands.Cog):
 
         message = await ctx.send(f"{debate_role.mention} A new debate has started!", embed=embed)
         await message.create_thread(name=f"{question}", auto_archive_duration=60)
+
+def setup(bot):
+    bot.add_cog(Debate(bot))
