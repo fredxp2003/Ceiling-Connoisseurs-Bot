@@ -14,8 +14,8 @@ bot = discord.Bot(intents=intents)
 PREMIUM_CEILING_DB = 'premium_ceiling.db'
 LEADERBOARD_DB = 'leaderboard.db'
 
-PREMIUM_CEILING_CHANNEL_ID = 1243981538845134859    #1150273041406890065 <- Live Server
-BAD_CEILING_CHANNEL_ID  = 1243981590053392445        #1149113000465285231 <- Live Server
+PREMIUM_CEILING_CHANNEL_ID = 1150273041406890065
+BAD_CEILING_CHANNEL_ID  = 1149113000465285231
 ROLE_MESSAGE_ID = 1165779240659198072
 DEBATES_ROLE_NAME = "Debates"
 
@@ -127,4 +127,4 @@ async def on_raw_reaction_remove(payload):
 
 
 # Run the bot B)
-bot.run(os.getenv('TEST_TOKEN'))
+bot.run(os.getenv('TOKEN'))
